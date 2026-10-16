@@ -1,4 +1,4 @@
-## Imports for Posts Router
+# Imports for Posts Router
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -13,9 +13,11 @@ from schemas import PostCreate, PostResponse, PostUpdate
 router = APIRouter()
 
 # get_posts
+
+
 @router.get("", response_model=list[PostResponse])
 async def get_posts(db: Annotated[AsyncSession, Depends(get_db)]):
-    result = await db.execute(select(models.Post).options(selectinload(models.Post.author)))
+    result = await db.execute(select(models.Post).options(selectinload(models.Post.author)).order_by(models.Post.date_posted.desc()))
     posts = result.scalars().all()
     return posts
 
@@ -59,6 +61,8 @@ async def get_post(post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
                         detail="Post not found")
 
 # edit_post full
+
+
 @router.put("/{post_id}", response_model=PostResponse)
 async def update_post_full(post_id: int, post_data: PostCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.Post).where(models.Post.id == post_id))
@@ -88,6 +92,7 @@ async def update_post_full(post_id: int, post_data: PostCreate, db: Annotated[As
 
 # edit_post partially
 
+
 @router.patch("/{post_id}", response_model=PostResponse)
 async def update_post_partial(post_id: int, post_data: PostUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.Post).where(models.Post.id == post_id))
@@ -106,6 +111,7 @@ async def update_post_partial(post_id: int, post_data: PostUpdate, db: Annotated
     return post
 
 # delete_post
+
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(post_id: int, db: Annotated[AsyncSession, Depends(get_db)]):

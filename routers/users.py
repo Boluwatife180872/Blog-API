@@ -1,4 +1,4 @@
-## Imports for Users Router
+# Imports for Users Router
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -11,7 +11,6 @@ from database import get_db
 from schemas import PostResponse, UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()
-
 
 
 @router.post(
@@ -50,6 +49,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
 
     return new_user
 
+
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.User).where(
@@ -64,6 +64,8 @@ async def get_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
                         )
 
 # update_user
+
+
 @router.patch("/{user_id}", response_model=UserResponse)
 async def update_user(
     user_id: int,
@@ -113,6 +115,8 @@ async def update_user(
     return user
 
 # delete_user
+
+
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(select(models.User).where(models.User.id == user_id))
@@ -131,7 +135,7 @@ async def delete_user(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]
 
 @router.get("/{user_id}/posts", response_model=list[PostResponse])
 async def get_user_posts(user_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    result = await db.execute(select(models.User).where(models.User.id == user_id).order_by(models.Post.date_posted.desc()))
     user = result.scalars().first()
     if not user:
         raise HTTPException(
